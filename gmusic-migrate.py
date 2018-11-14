@@ -111,7 +111,7 @@ if migration_type == 'all' or migration_type == 'tracks':
             log.info('Importing track ' + str(i) + ' of ' + str(len(all_tracks)))
         if not simulate:
             try:
-                import_api.add_store_track(track_id)
+                import_api.add_store_tracks(track_id)
             except CallFailure as e:
                 log.error('Add failed for track ' + track_artist + ' - ' + track_title)
                 log.debug('ID of failed track is ' + track_id)
