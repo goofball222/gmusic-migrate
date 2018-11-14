@@ -17,6 +17,7 @@ parser.add_argument('origin', help='origin account email')
 parser.add_argument('-op', default=False, help='password for origin account (note, passing this on the command line is OPTIONAL and not very secure!)')
 parser.add_argument('destination', help='destination account email')
 parser.add_argument('-dp', required=False, help='password for destination account')
+parser.add_argument('androidid', help='Android ID/GMusic Client ID')
 parser.add_argument('-v', choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'], required=False, default='INFO', help='verbosity of console output, default is INFO')
 parser.add_argument('-loglevel', choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'], required=False, default="DEBUG", help='verbosity for file logging, default is DEBUG')
 parser.add_argument('-migrate', choices=['all', 'tracks', 'ratings', 'playlists', 'stations'], required=False, default='all', help='what to migrate, default is all')
@@ -28,6 +29,7 @@ export_username = args.get('origin')
 export_password = args.get('op')
 import_username = args.get('destination')
 import_password = args.get('dp')
+android_id = args.get('androidid')
 console_loglevel = args.get('v')
 file_loglevel = args.get('loglevel')
 migration_type = args.get('migrate')
@@ -49,7 +51,7 @@ if not export_password:
     log.debug('No password provided, requesting from console')
     export_password = getpass('Password for ' + export_username + ': ')
 log.debug('Logging in with user ' + export_username)
-if not export_api.login(export_username, export_password):
+if not export_api.login(export_username, export_password, android_id):
     log.critical('Login failed! Check your username, password, and network connection')
     exit()
 export_password = None
@@ -59,7 +61,7 @@ if not import_password:
     log.debug('No password provided, requesting from console')
     import_password = getpass('Password for ' + import_username + ': ')
 log.debug('Logging in with user ' + import_username)
-if not import_api.login(import_username, import_password):
+if not import_api.login(import_username, import_password, android_id):
     log.critical('Unable to login; check your username, password, and network connection')
     exit()
 import_password = None
@@ -77,8 +79,8 @@ if migration_type != 'stations':
     all_tracks = [t for t in export_tracks if track_has_aa_data(t) and not t.get('deleted')]
 
 if migration_type == 'all' or migration_type == 'ratings':
-    log.info('Retrieving thumbs up tracks from ' + export_username)
-    export_thumbs_up = export_api.get_thumbs_up_songs()
+    log.info('Retrieving thumbs up/promoted tracks from ' + export_username)
+    export_thumbs_up = export_api.get_promoted_songs()
     # strip out any tracks that are not available on All Access
     thumbs_up_tracks = [t for t in export_thumbs_up if track_has_aa_data(t)]
 
